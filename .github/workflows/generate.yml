@@ -1,0 +1,44 @@
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      cache:
+        type: string
+      skip_interval:
+        type: number
+      no_update_check:
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install
+      - uses: actions/cache@v5
+        with:
+          key: cache-
+          restore-keys: cache-${{ github.run_id }}
+          path: |
+            cache
+            gist-data.json
+            gist-data.zst
+      - name: 手動実行以外の場合は固定コマンド
+        run: node generate.js -u 0RIM0 -o gist-data.json -c cache
+        if: github.event_name != 'workflow_dispatch'
+      - name: 手動実行の場合は inputs に応じたコマンドを使う
+        run: >
+          node generate.js -u 0RIM0 -o gist-data.json
+            -c ${{ github.event.inputs.cache || '""' }}
+            ${{ github.event.inputs.skip_interval && format('--skip-interval {0}', github.event.inputs.skip_interval) || '' }}
+            ${{ github.event.inputs.no_update_check && '--no-update-check' || '' }}
+        if: github.event_name == 'workflow_dispatch'
+      - run: zstd gist-data.json -o gist-data.zst 
