@@ -39,8 +39,8 @@ jobs:
       - name: 手動実行の場合は inputs に応じたコマンドを使う
         run: >
           node generate.js -u 0RIM0 -o gist-data.json
-          ${{ case(github.event.inputs.cache, format('-c "{0}"', github.event.inputs.cache), '') }}
-          ${{ case(github.event.inputs.skip_interval, format('--skip-interval {0}', github.event.inputs.skip_interval), '') }}
+          ${{ case(github.event.inputs.cache != '', format('-c "{0}"', github.event.inputs.cache), '') }}
+          ${{ case(github.event.inputs.skip_interval != '', format('--skip-interval {0}', github.event.inputs.skip_interval), '') }}
           ${{ case(github.event.inputs.no_update_check, '--no-update-check', '') }}
         if: github.event_name == 'workflow_dispatch'
       - run: zstd gist-data.json -o gist-data.zst 
