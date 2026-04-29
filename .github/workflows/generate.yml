@@ -43,7 +43,7 @@ jobs:
           ${{ case(github.event.inputs.skip_interval != '', format('--skip-interval {0}', github.event.inputs.skip_interval), '') }}
           ${{ case(github.event.inputs.no_update_check != 'false', '--no-update-check', '') }}
         if: github.event_name == 'workflow_dispatch'
-      - run: zstd gist-data.json -o gist-data.zst 
+      - run: zstd -f gist-data.json -o gist-data.zst 
       - name: 確認のために結果を Artifact として保存
         uses: actions/upload-artifact@v4
         with:
