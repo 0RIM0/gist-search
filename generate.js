@@ -80,7 +80,7 @@ const createCache = (directory) => {
 const readFilePartial = async (filepath, start, end) => {
 	const stream = fs.createReadStream(filepath, { start, end, encoding: "utf-8" })
 
-	let result = ''
+	let result = ""
 	for await (const chunk of stream) {
 		result += chunk
 	}
@@ -223,7 +223,7 @@ const main = async () => {
 				},
 				"skip-interval": {
 					type: "string",
-					default: String(60 * 60 * 24 * 5),
+					default: String(60 * 60 * 24 * 1),
 				},
 				"no-update-check": {
 					type: "boolean",
