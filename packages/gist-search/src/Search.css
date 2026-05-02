@@ -1,0 +1,23 @@
+@scope (.component-search) to (.component-root) {
+	:scope {
+		margin: 30px 10px;
+	}
+
+	input {
+		width: 100%;
+		padding: 10px 16px;
+		outline: none;
+		border: 0;
+		background: #eee;
+		border-radius: 3px;
+		font-size: 1.4rem;
+		font-family: inherit;
+	}
+
+	.info {
+		display: flex;
+		justify-content: space-between;
+		color: silver;
+		font-size: 0.75rem;
+	}
+}

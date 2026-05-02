@@ -18,7 +18,7 @@ import markdownit from "markdown-it"
 const md = markdownit()
 const window = new Window({ url: "https://localhost:8080" })
 
-const getGists = async function* ({ user, per_page, since }) {
+const getGists = async function*({ user, per_page, since }) {
 	const url_obj = new URL(`https://api.github.com/users/${user}/gists`)
 	url_obj.searchParams.set("per_page", per_page ?? 100)
 	url_obj.searchParams.set("since", since ?? "")
@@ -154,7 +154,7 @@ const validateOptions = ({ values }) => {
 	return [errors, options]
 }
 
-const getGistFiles = async function* (options) {
+const getGistFiles = async function*(options) {
 	const processed = new Set()
 	const cache = createCache(options.cache)
 
@@ -228,7 +228,7 @@ const main = async () => {
 				"no-update-check": {
 					type: "boolean",
 					default: false,
-				}
+				},
 			},
 		}),
 	)

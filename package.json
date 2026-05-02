@@ -1,7 +1,13 @@
 {
+  "name": "workspace-root",
+  "version": "1.0.0",
+  "private": "true",
   "type": "module",
-  "dependencies": {
-    "happy-dom": "^20.9.0",
-    "markdown-it": "^14.1.1"
+  "scripts": {
+    "format": "dprint fmt"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "devDependencies": {
+    "dprint": "^0.54.0"
   }
 }

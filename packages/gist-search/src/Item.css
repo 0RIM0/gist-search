@@ -1,0 +1,31 @@
+@scope (.component-item) to (.component-root) {
+	:scope {
+		padding: 5px 10px;
+		color: inherit;
+		display: block;
+		text-decoration: none;
+
+		&:hover {
+			background: #f8f8f8;
+		}
+	}
+	.head {
+		display: flex;
+		gap: 10px;
+		font-size: 0.8rem;
+
+		.gist-id {
+			font-weight: bold;
+		}
+
+		.created-at {
+			margin-left: auto;
+		}
+	}
+	.body {
+		font-size: 0.9rem;
+		mark {
+			background: #ff0a;
+		}
+	}
+}

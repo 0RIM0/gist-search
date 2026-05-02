@@ -1,0 +1,8 @@
+{
+	"name": "generator",
+	"type": "module",
+	"dependencies": {
+		"happy-dom": "^20.9.0",
+		"markdown-it": "^14.1.1"
+	}
+}

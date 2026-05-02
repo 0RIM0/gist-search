@@ -1,0 +1,23 @@
+{
+  "typescript": {
+    "indentWidth": 4,
+    "useTabs": true,
+    "semiColons": "asi",
+    "quoteStyle": "preferDouble"
+  },
+  "json": {
+    "indentWidth": 4,
+    "useTabs": true
+  },
+  "includes": [
+    "packages/**/*.{ts,tsx,js,jsx,json}"
+  ],
+  "excludes": [
+    "**/node_modules",
+    "**/*-lock.json"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.95.15.wasm",
+    "https://plugins.dprint.dev/json-0.21.3.wasm"
+  ]
+}

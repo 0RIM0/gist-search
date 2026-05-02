@@ -1,0 +1,108 @@
+name: generate-build-deploy-pages
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      cache:
+        type: string
+      skip_interval:
+        type: number
+      no_update_check:
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "generate-build-deploy"
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/generator
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v5
+        with:
+          key: cache-${{ github.run_id }}
+          restore-keys: cache-
+          path: |
+            packages/generator/cache
+            packages/generator/gist-data.json
+            packages/generator/gist-data.zst
+      - name: 手動実行以外の場合は固定コマンド
+        run: node generate.js -u 0RIM0 -o gist-data.json -c cache
+        if: github.event_name != 'workflow_dispatch'
+      - name: 手動実行の場合は inputs に応じたコマンドを使う
+        run: >
+          node generate.js -u 0RIM0 -o gist-data.json
+          ${{ case(github.event.inputs.cache != '', format('-c "{0}"', github.event.inputs.cache), '') }}
+          ${{ case(github.event.inputs.skip_interval != '', format('--skip-interval {0}', github.event.inputs.skip_interval), '') }}
+          ${{ case(github.event.inputs.no_update_check != 'false', '--no-update-check', '') }}
+        if: github.event_name == 'workflow_dispatch'
+      - run: zstd -f gist-data.json -o gist-data.zst 
+      - name: 確認のために結果を Artifact として保存
+        uses: actions/upload-artifact@v7
+        with:
+          name: gist-data.zst
+          path: packages/generator/gist-data.zst
+          retention-days: 1
+
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/gist-search
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: gist-search-dist
+          path: packages/gist-search/dist
+          retention-days: 1
+
+  deploy:
+    needs: ["generate", "build"]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: "."
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
