@@ -66,15 +66,15 @@ const createCache = (directory) => {
 		? async (key, register) => {
 			const cache_file = path.join(directory, key)
 			if (fs.existsSync(cache_file)) {
-				return await fs.promises.readFile(cache_file, "utf-8")
+				return [await fs.promises.readFile(cache_file, "utf-8"), true]
 			} else {
 				const text = await register()
 				await fs.promises.mkdir(path.dirname(cache_file), { recursive: true })
 				await fs.promises.writeFile(cache_file, text)
-				return text
+				return [text, false]
 			}
 		}
-		: (key, register) => register()
+		: async (key, register) => [await register(), false]
 }
 
 const readFilePartial = async (filepath, start, end) => {
@@ -173,7 +173,7 @@ const getGistFiles = async function* (options) {
 			for (const { filename, type, raw_url } of Object.values(files)) {
 				if (type === "text/markdown") {
 					const key = `${id}_${timestamp}/${filename}`
-					let text = await cache(key, () => getMarkdownFile(raw_url))
+					let [text, cache_hit] = await cache(key, () => getMarkdownFile(raw_url))
 
 					// gist の description も本文に含める
 					// 1 gist に複数の markdown ファイルがあると全てに含めることになるけど
@@ -184,10 +184,10 @@ const getGistFiles = async function* (options) {
 					if (text.length < options.min_text_length) continue
 
 					yield { id, filename, created_at, text }
-					process.stdout.write(".")
+					options.notify?.(cache_hit ? "file-cache" : "file-nocache")
 				}
 			}
-			process.stdout.write(":")
+			options.notify?.("gist")
 		}
 	}
 }
@@ -261,7 +261,6 @@ const main = async () => {
 			// 内容の前回とのマージはできないので更新が必要かの判断のみ
 			// 取得したものは捨てるので 1 件のみの取得
 			console.log("update check:", date)
-			options.date = date.toJSON()
 			const { value } = await getGists({ user: options.user, per_page: 1, since: date.toJSON() }).next()
 			if (value.length === 0) {
 				console.log("no updates")
@@ -273,6 +272,20 @@ const main = async () => {
 	}
 
 	console.log("start!")
+
+	options.notify = (type) => {
+		switch (type) {
+			case "file-cache":
+				process.stdout.write(",")
+				break
+			case "file-nocache":
+				process.stdout.write(".")
+				break
+			case "gist":
+				process.stdout.write(":")
+				break
+		}
+	}
 
 	// json format: { timestamp: "2025-01-01T00:00:00Z", gists: [[], [], ...] }
 	const file = fs.createWriteStream(options.output)
