@@ -16,8 +16,7 @@ Gist の検索がイマイチなので自分で検索できるようにしたも
 
 文字列入力の input がひとつだけなので見たまま  
 
-<img src="docs/img00.png" width=400>
-<img src="docs/img01.png" width=400>
+<img src="docs/img00.png" width=300> <img src="docs/img01.png" width=300>  
 
 検索対象のデータは固定ではなくクエリパラメーターで URL を指定してそれをダウンロードして使う  
 `?data=<url>`  
@@ -66,7 +65,7 @@ Gist データを収集して上記フォーマットの JSON を作る
 - `--min-text-length`
   - 必要な文字数（この文字数未満のファイルはスキップ）
   - デフォルト: 50
-- `--output`
+- `--output` (`-o`)
   - 出力するファイル名
   - デフォルト: `gist-data.json`
 - `--cache` (`-c`)
