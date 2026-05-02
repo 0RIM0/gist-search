@@ -3,7 +3,12 @@ import createWorker from "./search-worker.js?worker"
 const worker = createWorker()
 export const data_url = new URL(location).searchParams.get("data") ?? ""
 if (data_url) {
-	worker.postMessage({ load: data_url })
+	try {
+		const resolved_url = new URL(data_url, location.href).href
+		worker.postMessage({ load: resolved_url })
+	} catch {
+		console.error("invalid data url")
+	}
 }
 
 let state = null
