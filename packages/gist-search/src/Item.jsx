@@ -10,7 +10,7 @@ const Item = React.memo(({ item }) => {
 		return [...acc, elem]
 	}, [])
 
-	const url = `https://gist.github.com/${item.gist_id}#${item.filename}`
+	const url = `https://gist.github.com/${item.gist_id}#${getHash(item.filename)}`
 
 	return (
 		<a href={url} target="_blank" className="component--root component-item">
@@ -25,5 +25,12 @@ const Item = React.memo(({ item }) => {
 		</a>
 	)
 })
+
+// Gist の各ファイルにジャンプするための hash を作る
+// `file-` プレフィックスをつけて英数と `_` 以外は `-` に置き換え
+// `-` は連続しない
+const getHash = (filename) => {
+	return ("file-" + filename.replace(/[^a-zA-Z0-9_]/g, "-")).replace(/-+/g, "-")
+}
 
 export default Item
