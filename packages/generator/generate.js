@@ -275,7 +275,7 @@ const main = async () => {
 
 	const counts = {
 		"file-cache": 0,
-		"file-no-cache": 0,
+		"file-nocache": 0,
 		gist: 0,
 	}
 	options.notify = (type) => {
@@ -314,7 +314,7 @@ const main = async () => {
 
 		// show stats
 		const cache = counts["file-cache"]
-		const nocache = counts["file-no-cache"]
+		const nocache = counts["file-nocache"]
 		const gists = counts.gist
 		const files = cache + nocache
 		console.log(`${files} files (cache/nocache: ${cache}/${nocache}), ${gists} gists`)
