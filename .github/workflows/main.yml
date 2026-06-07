@@ -46,7 +46,7 @@ jobs:
             packages/generator/gist-data.json
             packages/generator/gist-data.zst
       - name: 手動実行以外の場合は固定コマンド
-        run: node generate.js -u 0RIM0 -o gist-data.json -c cache
+        run: node src/cli.js -u 0RIM0 -o gist-data.json -c cache
         if: github.event_name != 'workflow_dispatch'
       - name: 手動実行の場合は inputs に応じたコマンドを使う
         run: >

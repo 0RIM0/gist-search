@@ -4,5 +4,8 @@
 	"dependencies": {
 		"happy-dom": "^20.9.0",
 		"markdown-it": "^14.1.1"
+	},
+	"scripts": {
+		"test": "node --test --experimental-test-module-mocks"
 	}
 }
