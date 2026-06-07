@@ -20,7 +20,7 @@ const mockStdoutImpl = (value) => {
 
 describe("cli", () => {
 	it("成功：更新あり", async (t) => {
-		process.argv = ["node", "cli.js", "-u", "username"]
+		process.argv = ["node", "cli.js", "-u", "username", "--exclude-file", "A", "--exclude-file", "B"]
 		mockGenerate.mock.mockImplementation(async (options) => {
 			await setTimeout(10)
 			options.logger.log("A")
@@ -48,6 +48,7 @@ describe("cli", () => {
 			"min-text-length": "50",
 			"no-update-check": false,
 			"skip-interval": "86400",
+			"exclude-file": ["A", "B"],
 			logger: generate_arg.logger,
 			output: "gist-data.json",
 		})

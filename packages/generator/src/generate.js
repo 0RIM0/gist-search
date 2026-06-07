@@ -11,7 +11,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
-import { getGists, getMarkdownFileText } from "./gist.js"
+import { getGists, getMarkdownFileText, getMetaJSON } from "./gist.js"
 import { validateOptions } from "./options.js"
 import { createCache, readFilePartial } from "./utils.js"
 
@@ -33,6 +33,18 @@ const getPreTimestamp = async (filepath) => {
 	return date
 }
 
+const getMetaSearchExclude = async (files) => {
+	if (!files["_meta.json"]) return
+
+	const { search_exclude } = await getMetaJSON(files["_meta.json"].raw_url)
+	if (!search_exclude) return
+
+	const valid = search_exclude === true || Array.isArray(search_exclude)
+	if (!valid) return
+
+	return search_exclude
+}
+
 const getGistFiles = async function*(options) {
 	const processed = new Set()
 	const cache = createCache(options.cache)
@@ -47,9 +59,23 @@ const getGistFiles = async function*(options) {
 			if (processed.has(id)) continue
 			processed.add(id)
 
+			const excludes = options.exclude_files.filter(([exid]) => exid === id)
+			// id のみでマッチする除外設定
+			if (excludes.some(([, exfile]) => !exfile)) continue
+
+			const meta_search_exclude = await getMetaSearchExclude(files)
+			if (meta_search_exclude === true) continue
+
+			const exclude_filnames = [
+				...excludes.map(([, exfile]) => exfile).filter(x => x),
+				...meta_search_exclude ?? [],
+			]
+
 			const timestamp = updated_at.replace(/[-\/_:]/g, "")
 
 			for (const { filename, type, raw_url } of Object.values(files)) {
+				if (exclude_filnames.some(exfilename => exfilename === filename)) continue
+
 				if (type === "text/markdown") {
 					const key = `${id}_${timestamp}/${filename}`
 					let [text, cache_hit] = await cache(key, () => getMarkdownFileText(raw_url))
@@ -73,7 +99,7 @@ const getGistFiles = async function*(options) {
 
 const generate = async (opts) => {
 	const now = new Date()
-	const [errors, options] = validateOptions(opts)
+	const [errors, options] = await validateOptions(opts)
 
 	if (errors.length) {
 		throw new Error("validation error", { cause: { validation_errors: errors } })

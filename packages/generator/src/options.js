@@ -1,3 +1,5 @@
+import fs from "node:fs"
+
 export const cli_options = {
 	user: {
 		type: "string",
@@ -32,16 +34,34 @@ export const cli_options = {
 		type: "boolean",
 		default: false,
 	},
+	"exclude-file": {
+		type: "string",
+		multiple: true,
+		default: [],
+	},
+	"config": {
+		type: "string",
+		short: "C",
+	},
 }
 
-export const validateOptions = (values) => {
+export const validateOptions = async (values) => {
 	const errors = []
 	const options = {}
+
+	if (values.config) {
+		try {
+			const data = await fs.promises.readFile(values.config, "utf-8")
+			values = { ...data, ...values }
+		} catch {
+			errors.push("invalid config file")
+		}
+	}
 
 	if (!values.user) {
 		errors.push("user is required")
 	} else {
-		options.user = values.user
+		options.user = String(values.user || "")
 	}
 
 	const min_date = new Date(values["min-date"])
@@ -70,9 +90,15 @@ export const validateOptions = (values) => {
 		options.skip_interval = ~~values["skip-interval"]
 	}
 
-	options.output = values.output
-	options.cache = values.cache
-	options.no_update_check = values["no-update-check"]
+	options.output = String(values.output || "")
+	options.cache = String(values.cache || "")
+	options.no_update_check = !!values["no-update-check"]
+	options.exclude_files = [].concat(values["exclude-file"]).map(item => {
+		if (typeof item === "string") {
+			const [id, file] = item.split("/")
+			return id ? [id, file] : null
+		}
+	}).filter(x => x)
 	options.logger = values.logger ?? {
 		log: () => {},
 		progress: () => {},

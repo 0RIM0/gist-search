@@ -46,3 +46,15 @@ export const getMarkdownFileText = async (url) => {
 	document.body.innerHTML = html
 	return document.body.innerText.replace(/\s+/g, " ")
 }
+
+export const getMetaJSON = async (url) => {
+	const res = await fetch(url)
+	if (!res.ok) {
+		throw new Error("failed to fetch meta-json file: " + url)
+	}
+	try {
+		return await res.json()
+	} catch {
+		throw new Error("invalid json file: " + url)
+	}
+}
